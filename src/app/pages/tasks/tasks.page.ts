@@ -5,7 +5,8 @@ import { RouterLink } from '@angular/router';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons,
   IonList, IonItem, IonCheckbox, IonLabel, IonFab, IonFabButton,
-  IonModal, IonInput, IonRadioGroup, IonRadio
+  IonModal, IonInput, IonRadioGroup, IonRadio,
+  IonSelectOption, IonSelect
 } from '@ionic/angular/standalone';
 import { Task } from '../../models/task.model';
 import { Category } from '../../models/category.model';
@@ -20,7 +21,8 @@ import { CategoryService } from '../../core/services/category.service';
   imports: [
     RouterLink, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule,
     FormsModule, IonButton, IonButtons, IonList, IonItem, IonCheckbox,
-    IonLabel, IonFab, IonFabButton, IonModal, IonInput, IonRadioGroup, IonRadio
+    IonLabel, IonFab, IonFabButton, IonModal, IonInput, IonRadioGroup, IonRadio,
+    IonSelectOption, IonSelect
   ]
 })
 export class TasksPage {
@@ -29,6 +31,9 @@ export class TasksPage {
   categories: Category[] = [];
   newTaskTitle: string = '';
   selectedCategoryId: string | null = null;
+  selectedFilterCategoryId: string | null = null;
+  readonly NO_CATEGORY = '__NO_CATEGORY__';
+  categoryMap: Record<string, string> = {};
 
   constructor(
     private taskService: TaskService,
@@ -42,6 +47,11 @@ export class TasksPage {
 
   async loadCategories() {
     this.categories = await this.categoryService.getAll();
+    this.categories.forEach(category => {
+      this.categoryMap[
+        category.id
+      ] = category.name;
+    });
   }
 
   async loadTasks() {
@@ -80,11 +90,30 @@ export class TasksPage {
     if (!categoryId) {
       return 'Sin categoría';
     }
-    return this.categories
-      .find(
-        c => c.id === categoryId
-      )?.name
-      ?? 'Sin categoría';
+    return (
+      this.categoryMap[categoryId]
+      ?? 'Sin categoría'
+    );
+  }
+
+  get filteredTasks(): Task[] {
+    if (this.selectedFilterCategoryId === null) {
+      return this.tasks;
+    }
+    if (
+      this.selectedFilterCategoryId ===
+      this.NO_CATEGORY
+    ) {
+      return this.tasks.filter(
+        task => !task.categoryId
+      );
+
+    }
+    return this.tasks.filter(
+      task =>
+        task.categoryId ===
+        this.selectedFilterCategoryId
+    );
   }
 
 }
