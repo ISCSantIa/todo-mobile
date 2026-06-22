@@ -12,6 +12,7 @@ import { Task } from '../../models/task.model';
 import { Category } from '../../models/category.model';
 import { TaskService } from '../../core/services/task.service';
 import { CategoryService } from '../../core/services/category.service';
+import { FeatureService } from '../../core/services/feature.service';
 
 @Component({
   selector: 'app-tasks',
@@ -37,7 +38,8 @@ export class TasksPage {
 
   constructor(
     private taskService: TaskService,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private featureService: FeatureService
   ) { }
 
   async ionViewWillEnter() {
@@ -114,6 +116,13 @@ export class TasksPage {
         task.categoryId ===
         this.selectedFilterCategoryId
     );
+  }
+
+  get categoriesEnabled() {
+
+    return this.featureService
+      .categoriesEnabled;
+
   }
 
 }

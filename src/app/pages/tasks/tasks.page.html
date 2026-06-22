@@ -83,8 +83,11 @@
           </ion-input>
         </ion-item>
 
-        <h5 class="ion-padding-start ion-padding-top">Categoría</h5>
-        <ion-list>
+        <h5 *ngIf="categoriesEnabled" class="ion-padding-start ion-padding-top">
+          Categoría
+        </h5>
+
+        <ion-list *ngIf="categoriesEnabled">
           <ion-radio-group [(ngModel)]="selectedCategoryId">
 
             <ion-item>
