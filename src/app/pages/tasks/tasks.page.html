@@ -13,5 +13,30 @@
 </ion-header>
 
 <ion-content>
-
+  <ion-list>
+    <ion-item *ngFor="
+let task of tasks;
+trackBy: trackByTask
+">
+      <ion-checkbox slot="start" [checked]="task.completed" (ionChange)="toggleTask(task.id)">
+      </ion-checkbox>
+      <ion-label>
+        <h2>
+          {{task.title}}
+        </h2>
+        <p>
+          {{task.completed ?
+          'Completada':'Pendiente'}}
+        </p>
+      </ion-label>
+      <ion-button color="danger" slot="end" (click)="deleteTask(task.id)">
+        Eliminar
+      </ion-button>
+    </ion-item>
+  </ion-list>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="createTask()">
+      +
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

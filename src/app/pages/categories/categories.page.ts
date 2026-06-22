@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonBackButton, IonList, IonItem, IonLabel, IonButton, IonFab, IonFabButton } from '@ionic/angular/standalone';
 import { CategoryService } from '../../core/services/category.service';
 import { Category } from '../../models/category.model';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-categories',
   templateUrl: './categories.page.html',
   styleUrls: ['./categories.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonList, IonItem, IonLabel, IonFab, IonFabButton, IonButton, IonButtons]
+  imports: [RouterLink, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonList, IonItem, IonLabel, IonFab, IonFabButton, IonButton, IonButtons]
 })
 export class CategoriesPage {
 
