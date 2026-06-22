@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -23,12 +23,12 @@ import { FeatureService } from '../../core/services/feature.service';
     RouterLink, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule,
     FormsModule, IonButton, IonButtons, IonList, IonItem, IonCheckbox,
     IonLabel, IonFab, IonFabButton, IonModal, IonInput, IonRadioGroup, IonRadio,
-    IonSelectOption, IonSelect
-  ]
+    IonSelectOption, IonSelect, AsyncPipe
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TasksPage {
 
-  tasks: Task[] = [];
   categories: Category[] = [];
   newTaskTitle: string = '';
   selectedCategoryId: string | null = null;
@@ -36,39 +36,38 @@ export class TasksPage {
   readonly NO_CATEGORY = '__NO_CATEGORY__';
   categoryMap: Record<string, string> = {};
 
+  tasks$ = this.taskService.tasks$;
+
   constructor(
     private taskService: TaskService,
     private categoryService: CategoryService,
-    private featureService: FeatureService
+    public featureService: FeatureService
   ) { }
 
   async ionViewWillEnter() {
-    await this.loadCategories();
-    await this.loadTasks();
-  }
+    try {
+      const [categoriesData, _] = await Promise.all([
+        this.categoryService.getAll(),
+        this.taskService.initialize()
+      ]);
 
-  async loadCategories() {
-    this.categories = await this.categoryService.getAll();
-    this.categories.forEach(category => {
-      this.categoryMap[
-        category.id
-      ] = category.name;
-    });
-  }
+      this.categories = categoriesData;
+      this.categoryMap = {};
+      this.categories.forEach(category => {
+        this.categoryMap[category.id] = category.name;
+      });
 
-  async loadTasks() {
-    this.tasks = await this.taskService.getAll();
-    this.tasks.sort((a, b) => b.createdAt - a.createdAt);
+    } catch (error) {
+      console.error('Error en la carga inicial optimizada:', error);
+    }
   }
 
   async toggleTask(id: string) {
     await this.taskService.toggleCompleted(id);
-    await this.loadTasks();
   }
 
   async deleteTask(id: string) {
     await this.taskService.delete(id);
-    await this.loadTasks();
   }
 
   async saveTask(modalElement: any) {
@@ -78,7 +77,6 @@ export class TasksPage {
     await this.taskService.create(this.newTaskTitle, this.selectedCategoryId as string);
     this.newTaskTitle = '';
     this.selectedCategoryId = null;
-    await this.loadTasks();
     modalElement.dismiss();
   }
 
@@ -86,43 +84,28 @@ export class TasksPage {
     return task.id;
   }
 
-  getCategoryName(
-    categoryId?: string
-  ) {
+  getCategoryName(categoryId?: string): string {
     if (!categoryId) {
       return 'Sin categoría';
     }
-    return (
-      this.categoryMap[categoryId]
-      ?? 'Sin categoría'
-    );
+    return this.categoryMap[categoryId] ?? 'Sin categoría';
   }
 
-  get filteredTasks(): Task[] {
-    if (this.selectedFilterCategoryId === null) {
-      return this.tasks;
-    }
-    if (
-      this.selectedFilterCategoryId ===
-      this.NO_CATEGORY
-    ) {
-      return this.tasks.filter(
-        task => !task.categoryId
-      );
+  filterTasksList(tasks: Task[] | null): Task[] {
+    if (!tasks) return [];
 
+    const sorted = [...tasks].sort((a, b) => b.createdAt - a.createdAt);
+
+    if (this.selectedFilterCategoryId === null) {
+      return sorted;
     }
-    return this.tasks.filter(
-      task =>
-        task.categoryId ===
-        this.selectedFilterCategoryId
-    );
+    if (this.selectedFilterCategoryId === this.NO_CATEGORY) {
+      return sorted.filter(task => !task.categoryId);
+    }
+    return sorted.filter(task => task.categoryId === this.selectedFilterCategoryId);
   }
 
   get categoriesEnabled() {
-
-    return this.featureService
-      .categoriesEnabled;
-
+    return this.featureService.categoriesEnabled;
   }
-
 }

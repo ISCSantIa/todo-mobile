@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonBackButton, IonList, IonItem, IonLabel, IonButton, IonFab, IonFabButton } from '@ionic/angular/standalone';
 import { CategoryService } from '../../core/services/category.service';
+import { CategoryManagerService } from '../../core/services/category-manager.service';
 import { Category } from '../../models/category.model';
 import { RouterLink } from '@angular/router';
 
@@ -18,7 +19,8 @@ export class CategoriesPage {
   categories: Category[] = [];
 
   constructor(
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private categoryManagerService: CategoryManagerService
   ) { }
 
   async ionViewWillEnter() {
@@ -43,7 +45,8 @@ export class CategoriesPage {
   async deleteCategory(
     id: string
   ) {
-    await this.categoryService.delete(id);
+    await this.categoryManagerService
+      .deleteCategory(id);
     await this.loadCategories();
   }
 

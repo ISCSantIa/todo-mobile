@@ -4,7 +4,7 @@
       Tasks
     </ion-title>
 
-    <ion-buttons slot="end">
+    <ion-buttons slot="end" *ngIf="categoriesEnabled">
       <ion-button routerLink="/categories">
         Categories
       </ion-button>
@@ -12,8 +12,9 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-item>
+<ion-content *ngIf="(tasks$ | async) as rawTasks">
+
+  <ion-item *ngIf="categoriesEnabled">
     <ion-label>
       Categoría
     </ion-label>
@@ -29,26 +30,31 @@
       </ion-select-option>
     </ion-select>
   </ion-item>
+
   <ion-item lines="none">
     <ion-label>
-      {{ filteredTasks.length }}
+      {{ filterTasksList(rawTasks).length }}
       tarea(s)
     </ion-label>
   </ion-item>
-  <div *ngIf="filteredTasks.length === 0">
+
+  <div *ngIf="filterTasksList(rawTasks).length === 0">
     No hay tareas para esta categoría
   </div>
+
   <ion-list>
-    <ion-item *ngFor="let task of filteredTasks; trackBy: trackByTask">
+    <ion-item *ngFor="let task of filterTasksList(rawTasks); trackBy: trackByTask">
       <ion-checkbox slot="start" [checked]="task.completed" (ionChange)="toggleTask(task.id)">
       </ion-checkbox>
       <ion-label>
         <h2>
           {{task.title}}
         </h2>
-        <p>
-          {{getCategoryName(task.categoryId)}}
+
+        <p *ngIf="categoriesEnabled">
+          {{ getCategoryName(task.categoryId) }}
         </p>
+
         <p>
           {{task.completed ? 'Completada':'Pendiente'}}
         </p>
