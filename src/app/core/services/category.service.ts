@@ -22,6 +22,79 @@ export class CategoryService {
 
     }
 
+    async create(
+        name: string
+    ): Promise<void> {
+
+        if (!name.trim()) {
+            return;
+        }
+
+        const categories = await this.getAll();
+
+        const exists =
+            categories.some(
+                item =>
+                    item.name.toLowerCase()
+                    === name.toLowerCase()
+            );
+
+        if (exists) {
+            return;
+        }
+
+        const newCategory: Category = {
+
+            id: crypto.randomUUID(),
+
+            name
+
+        };
+
+
+        categories.push(newCategory);
+
+
+        await this.saveAll(categories);
+
+    }
+
+    async update(
+        category: Category
+    ): Promise<void> {
+
+
+        const categories = await this.getAll();
+
+
+        const index = categories.findIndex(
+            item => item.id === category.id
+        );
+
+
+        if (index === -1) {
+            return;
+        }
+
+
+        categories[index] = category;
+
+
+        await this.saveAll(categories);
+
+    }
+
+    async delete(
+        id: string
+    ): Promise<void> {
+        const categories = await this.getAll();
+        const filtered = categories.filter(
+            item => item.id !== id
+        );
+        await this.saveAll(filtered);
+
+    }
+
     async saveAll(
         categories: Category[]
     ): Promise<void> {
@@ -30,31 +103,6 @@ export class CategoryService {
             STORAGE_KEYS.CATEGORIES,
             categories
         );
-
-    }
-
-    async seed(): Promise<void> {
-
-        const categories = await this.getAll();
-
-        if (categories.length > 0) {
-            return;
-        }
-
-        await this.saveAll([
-            {
-                id: crypto.randomUUID(),
-                name: 'Trabajo'
-            },
-            {
-                id: crypto.randomUUID(),
-                name: 'Personal'
-            },
-            {
-                id: crypto.randomUUID(),
-                name: 'Estudio'
-            }
-        ]);
 
     }
 
