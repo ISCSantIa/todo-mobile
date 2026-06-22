@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons } from '@ionic/angular/standalone';
+import { CategoryService } from '../../core/services/category.service';
 
 @Component({
   selector: 'app-tasks',
@@ -12,9 +13,16 @@ import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons } fr
 })
 export class TasksPage implements OnInit {
 
-  constructor() { }
+  constructor(
+    private categoryService: CategoryService
+  ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.categoryService.seed();
+    console.log(
+      await this.categoryService.getAll()
+    );
+
   }
 
 }
