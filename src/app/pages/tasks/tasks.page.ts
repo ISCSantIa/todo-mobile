@@ -6,13 +6,19 @@ import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons,
   IonList, IonItem, IonCheckbox, IonLabel, IonFab, IonFabButton,
   IonModal, IonInput, IonRadioGroup, IonRadio,
-  IonSelectOption, IonSelect
+  IonSelectOption, IonSelect,
+  IonIcon,
+  IonBadge
 } from '@ionic/angular/standalone';
 import { Task } from '../../models/task.model';
 import { Category } from '../../models/category.model';
 import { TaskService } from '../../core/services/task.service';
 import { CategoryService } from '../../core/services/category.service';
 import { FeatureService } from '../../core/services/feature.service';
+import { AlertController } from '@ionic/angular/standalone';
+import { UiService } from '../../core/services/ui.service';
+import { add, trashOutline, clipboardOutline } from 'ionicons/icons';
+import { addIcons } from 'ionicons';
 
 @Component({
   selector: 'app-tasks',
@@ -23,7 +29,7 @@ import { FeatureService } from '../../core/services/feature.service';
     RouterLink, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule,
     FormsModule, IonButton, IonButtons, IonList, IonItem, IonCheckbox,
     IonLabel, IonFab, IonFabButton, IonModal, IonInput, IonRadioGroup, IonRadio,
-    IonSelectOption, IonSelect, AsyncPipe
+    IonSelectOption, IonSelect, AsyncPipe, IonIcon, IonIcon
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -41,11 +47,16 @@ export class TasksPage {
   constructor(
     private taskService: TaskService,
     private categoryService: CategoryService,
-    public featureService: FeatureService
-  ) { }
+    public featureService: FeatureService,
+    private alertController: AlertController,
+    private uiService: UiService
+  ) {
+    addIcons({ add, trashOutline, clipboardOutline });
+  }
 
   async ionViewWillEnter() {
     try {
+      await this.uiService.showLoading('Sincronizando datos...');
       const [categoriesData, _] = await Promise.all([
         this.categoryService.getAll(),
         this.taskService.initialize()
@@ -59,6 +70,8 @@ export class TasksPage {
 
     } catch (error) {
       console.error('Error en la carga inicial optimizada:', error);
+    } finally {
+      await this.uiService.dismissLoading();
     }
   }
 
@@ -68,6 +81,29 @@ export class TasksPage {
 
   async deleteTask(id: string) {
     await this.taskService.delete(id);
+    await this.uiService.showToast('Tarea eliminada', 'danger');
+  }
+
+  async confirmDeleteTask(id: string) {
+    const alert = await this.alertController.create({
+      header: 'Eliminar tarea',
+      message: '¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer.',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: async () => {
+            await this.deleteTask(id);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   async saveTask(modalElement: any) {
@@ -78,6 +114,7 @@ export class TasksPage {
     this.newTaskTitle = '';
     this.selectedCategoryId = null;
     modalElement.dismiss();
+    await this.uiService.showToast('Tarea creada con éxito');
   }
 
   trackByTask(index: number, task: Task) {
@@ -108,4 +145,5 @@ export class TasksPage {
   get categoriesEnabled() {
     return this.featureService.categoriesEnabled;
   }
+
 }

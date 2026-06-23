@@ -1,34 +1,47 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tasks"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title>
+      Categorías
+    </ion-title>
+
     <ion-buttons slot="end">
       <ion-button routerLink="/tasks">
         Tasks
       </ion-button>
     </ion-buttons>
-    <ion-title>
-      Categorías
-    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
 
-  <ion-list>
+  <ion-list *ngIf="categories.length > 0">
     <ion-item *ngFor="let category of categories">
       <ion-label>
         {{category.name}}
       </ion-label>
-      <ion-button slot="end" color="danger" (click)="deleteCategory(category.id)">
-        Eliminar
+
+      <ion-button slot="end" fill="clear" color="primary" (click)="editCategory(category)">
+        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
       </ion-button>
-      <ion-button (click)="editCategory(category)">
-        Editar
+
+      <ion-button slot="end" fill="clear" color="danger" (click)="confirmDeleteCategory(category.id)">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
       </ion-button>
     </ion-item>
   </ion-list>
 
+  <div *ngIf="categories.length === 0" class="empty-state">
+    <ion-icon name="folder-open-outline"></ion-icon>
+    <h2>No hay categorías</h2>
+    <p>Organiza tus actividades creando una nueva categoría</p>
+  </div>
+
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-    <ion-fab-button (click)="createCategory()">
+    <ion-fab-button (click)="openCreateCategoryModal()">
       +
     </ion-fab-button>
   </ion-fab>

@@ -38,8 +38,10 @@
     </ion-label>
   </ion-item>
 
-  <div *ngIf="filterTasksList(rawTasks).length === 0">
-    No hay tareas para esta categoría
+  <div *ngIf="filterTasksList(rawTasks).length === 0" class="empty-state">
+    <ion-icon name="clipboard-outline"></ion-icon>
+    <h2>No hay tareas</h2>
+    <p>Crea tu primera tarea presionando el botón +</p>
   </div>
 
   <ion-list>
@@ -47,20 +49,13 @@
       <ion-checkbox slot="start" [checked]="task.completed" (ionChange)="toggleTask(task.id)">
       </ion-checkbox>
       <ion-label>
-        <h2>
-          {{task.title}}
-        </h2>
-
-        <p *ngIf="categoriesEnabled">
-          {{ getCategoryName(task.categoryId) }}
-        </p>
-
-        <p>
-          {{task.completed ? 'Completada':'Pendiente'}}
-        </p>
+        <h2>{{task.title}}</h2>
+        <p *ngIf="categoriesEnabled">{{getCategoryName(task.categoryId)}}</p>
+        <p>{{task.completed ? 'Completada':'Pendiente'}}</p>
       </ion-label>
-      <ion-button color="danger" slot="end" (click)="deleteTask(task.id)">
-        Eliminar
+
+      <ion-button slot="end" color="danger" fill="clear" (click)="confirmDeleteTask(task.id)">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
       </ion-button>
     </ion-item>
   </ion-list>
